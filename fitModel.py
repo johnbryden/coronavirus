@@ -7,9 +7,6 @@ from scipy.optimize import minimize,differential_evolution
 import coronaModel as cm
 import dataProcessing as dp
 
-#from countryData import *
-#from coronaModel import *
-
 # In development you need to reload the libraries
 import importlib
 importlib.reload(cm)
@@ -102,23 +99,37 @@ width = int(.99+len(countries)/height)
 
 print ("params=[",','.join([str(x) for x in res.x]),"]")
 
+figure(1)
 clf()
 counter = 0
 for country in countries:
     ax = subplot(width,height,counter+1)
     country.country_data.plot(kind='scatter',x='daysSinceOrigin',y='deaths',logy=True,ax=ax)
-    ax.set_ylim(.5,max(country.country_data.deaths)*1.5)
+   
     
     params = dp.extractParameters(res.x,counter,single_beta1)
     counter += 1
     death_vals = dp.generateDeathValues(country,params)
     plot (death_vals,'k')
     plot ([country.start_day,country.start_day],[.5,1e5])
-    start_t = country.getTimespan()[0]
+    start_t,end_t = country.getFullModelTimespan()
     plot ([start_t+params[6],start_t+params[6]],[.5,1e5])
     plot ([start_t+params[5],start_t+params[5]],[.5,1e5])
+    ax.set_ylim(.5,max(country.country_data.deaths)*1.5)
+    ax.set_xlim(start_t-1,end_t+1)
     title(country.country_code)
-    if counter == 0:
+    if counter == 1:
         legend (['model','First case','Model start','Lockdown start','Death data',])
+tight_layout()
+figure(2)
+counter = 0
+for country in countries:
+    ax = subplot(width,height,counter+1)
+    counter += 1
+    sus_vals = dp.generateSusceptibleValues(country,params)
+    plot (sus_vals,'k')
+    ax.set_xlim(start_t-1,end_t+1)
+    title(country.country_code)
+tight_layout()
 show()
 

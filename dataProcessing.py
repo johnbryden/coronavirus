@@ -24,7 +24,7 @@ class Country:
     # This is the timespan of the data for fitting models
     # against. There's an extra period prepended at the beginning
     # before the first detected case
-    def getTimespan(self):
+    def getFullModelTimespan(self):
         return self.start_day-self.prepend,len(self.country_data)
 
 
@@ -99,7 +99,7 @@ def prettyOutputParams(countries,params,single_beta1=True):
 
 # This fits the recorded death values against the model
 def fitDeathValuesToData (country,theta,psi,model_output):
-    start_t,end_t = country.getTimespan()
+    start_t,end_t = country.getFullModelTimespan()
     N = country.pop_size
     # add psi zeros to the front of the zvals array
     historic_zvals = np.concatenate((np.zeros(psi),model_output[:-psi,1]))
@@ -110,7 +110,7 @@ def fitDeathValuesToData (country,theta,psi,model_output):
 
 # This function is for plotting purposes
 def generateDeathValues(country,params):
-    start_t,end_t = country.getTimespan()
+    start_t,end_t = country.getFullModelTimespan()
     # Proportion that die
     theta=params[1]
     # Number of days from infection to death
@@ -120,9 +120,19 @@ def generateDeathValues(country,params):
     death_vals = historic_zvals*country.pop_size*theta
     return death_vals
 
+# This function is for plotting purposes
+def generateSusceptibleValues(country,params):
+    start_t,end_t = country.getFullModelTimespan()
+    # Proportion that die
+    theta=params[1]
+    # Number of days from infection to death
+    model_output = runModelForCountry(country,params)
+    susceptible_vals = np.concatenate((np.zeros(start_t),model_output[:,1]))
+    return 1-susceptible_vals
+
 def runModelForCountry (country,params):
     # We start up to a week before the first obs
-    start_t,end_t = country.getTimespan()
+    start_t,end_t = country.getFullModelTimespan()
 
     tau = start_t + params[6]
 
