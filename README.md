@@ -2,7 +2,7 @@
 
 This is a framework for fitting a model to coronavirus data.
 
-Getting the latest data.
+## Getting the latest data
 
 We are currently using data from European Centre for Disease Prevention and Control.
 
