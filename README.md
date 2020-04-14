@@ -3,6 +3,7 @@
 This is a framework for fitting a model to coronavirus data. It uses
 differential evolution to optimse a model fit.
 
+python fitModel.py
 
 ## Prerequisites
 

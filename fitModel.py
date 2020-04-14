@@ -151,6 +151,8 @@ for country in countries:
     plot (sus_vals,'k')
     ax.set_xlim(start_t-1,end_t+1)
     title(country.country_code)
+    xlabel('daysSinceOrigin')
+    ylabel('Susceptible density')
 tight_layout()
 show()
 
