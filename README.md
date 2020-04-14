@@ -1,7 +1,18 @@
 # Coronavirus model
 
-This is a framework for fitting a model to coronavirus data. It uses
-differential evolution to optimse a model fit.
+This is a framework for fitting models to coronavirus data.  The
+framework calculates how good different mathematical models are at
+predicting the death data we have from several countries. If a model
+fits the data better than another model, then that can tell us
+something about how the disease is spreading. The best fitting models
+can be run forward in time to see how likely different outcomes are.
+
+
+It uses differential evolution to optimse a model's fit to the death
+data from several countries. You can play around with the settings at
+the beginning of fitModel.py to specify different countries, etc.
+
+To run it, use...
 
 python fitModel.py
 
