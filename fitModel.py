@@ -20,7 +20,7 @@ def fitModel(x0,args):
     counter = 0
     neg_log_likelihood = 0
     for country in countries:
-        params = dp.extractParameters(x0,counter,args)
+        params = dp.extractParameters(x0,counter,args.single_beta1)
         neg_log_likelihood += dp.fitModelToCountry(args.model,country,params,args)
         counter += 1
     if neg_log_likelihood<min_val:
@@ -127,7 +127,7 @@ for country in countries:
     country.country_data.plot(kind='scatter',x='daysSinceOrigin',y='deaths',logy=True,ax=ax)
    
     
-    params = dp.extractParameters(res.x,counter,args)
+    params = dp.extractParameters(res.x,counter,args.single_beta1)
     counter += 1
     death_vals = dp.generateDeathValues(model,country,params,args)
     plot (death_vals,'k')
