@@ -48,10 +48,17 @@ after the lockdown. An interesting note about the Oxford model is that
 they set a proportion of infected+recovered individuals to die. In
 this case, the death rate will never go down.
 
+(Update 25-Apr) I have added a new model (model3) which has an
+'isolated' compartment. A few assumptions... The new compartment has a
+zero beta parameter and does not get infected. It accounts for 80% of
+the population. Susceptibles move to the isolated compartment at rate
+lambda.
+
 I have also added the ability to fit the same model to multiple
 countries, adapting some of the parameters (like transmission rate) to
-each country.
+each country. (Update 25-Apr) This wasn't working properly in the previous commit due
+to a bug in the single_beta1 parameter. That has now been fixed.
 
-I was thinking about adding MCMC to this, so it will do
-forecasting. However, I think finding a good model that fits the data
-first is probably a better plan.
+I was thinking about adding MCMC to this, so it will do forecasting. (Update 25-Apr) I
+have now added a new branch pymc3 to do this. It's very hacky at the
+moment.

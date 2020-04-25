@@ -46,10 +46,10 @@ prepend = 21
 single_beta1 = False
 
 # Number of parallel cores to work on optimisation
-workers = 2
+workers = 12
 
 #Which model
-model = cm.model2
+model = cm.model3
 
 # Use infected or infected+recovered as the compartment to select
 # mortalities from
@@ -57,9 +57,9 @@ use_infected = True
 
 #Which countries
 #test_countries = ["GBR","DEU","USA","ESP","ITA","CAN","FRA","BEL"]
-#test_countries = ["GBR","ITA"]
+#test_countries = ["GBR","ITA","CHN"]
 #test_countries = ["ISL",]
-test_countries = ["CHN"]
+test_countries = ["GBR"]
 countries = []
 
 for code_i in test_countries:
@@ -114,10 +114,11 @@ else:
 res = differential_evolution(fitModel,bounds, updating='deferred',workers=workers,args=(args,))
 dp.prettyOutputParams (countries,res.x,args)
 
-height = 2
+height = min(3,len(countries))
 width = int(.99+len(countries)/height)
 
 print ("params=[",','.join([str(x) for x in res.x]),"]")
+
 
 figure(1)
 clf()
@@ -153,6 +154,25 @@ for country in countries:
     title(country.country_code)
     xlabel('daysSinceOrigin')
     ylabel('Susceptible density')
+tight_layout()
+
+figure(3)
+clf()
+counter = 0
+for country in countries:
+    ax = subplot(width,height,counter+1)
+    counter += 1
+    sol = dp.runModelForCountry(model,country,params,extra_time=90)
+    plot (sol)
+    ax.set_xlim(start_t-1,end_t+1+90)
+    title(country.country_code)
+    xlabel('daysSinceOrigin')
+    ylabel('solution')
+    if counter == 1:
+        if shape(sol)[1] == 2:
+            legend (['y','z'])
+        else:
+            legend (['y','z','x'])
 tight_layout()
 show()
 
