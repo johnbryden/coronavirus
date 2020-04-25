@@ -129,7 +129,7 @@ def fitDeathValuesToData (country,theta,psi,model_output,args):
     return -log_likelihood
 
 # This function is for plotting purposes
-def generateDeathValues(model,country,params,args):
+def generateDeathValues(model,country,params,args,extra_time = 0):
     mortal_idx = 1
     if args.use_infected:
         mortal_idx = 0
@@ -138,7 +138,7 @@ def generateDeathValues(model,country,params,args):
     theta=params[1]
     # Number of days from infection to death
     psi = int(params[2])
-    model_output = runModelForCountry(model,country,params)
+    model_output = runModelForCountry(model,country,params,extra_time=extra_time)
     historic_zvals = np.concatenate((np.zeros(start_t),np.zeros(psi),model_output[:-psi,mortal_idx]))
     death_vals = historic_zvals*country.pop_size*theta
     return death_vals

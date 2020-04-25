@@ -11,11 +11,13 @@ import theano.tensor as tt
 
 import coronaModel as cm
 import dataProcessing as dp
+import plotTraces as pt
 
 # In development you need to reload the libraries
 import importlib
 importlib.reload(cm)
 importlib.reload(dp)
+importlib.reload(pt)
 
 
     
@@ -95,7 +97,7 @@ prepend = 21
 single_beta1 = False
 
 # Number of parallel cores to work on optimisation
-workers = 12
+workers = 2
 
 #Which model
 model = cm.model3
@@ -161,28 +163,33 @@ else:
         bounds += [beta_bds,beta_bds,lock_bds,inf_start_bds]
 
 if (True):
-    args.params = [ 0.06571403225775024,0.004109072221515714,14.691190780052711,0.29358164422421884,0.26208455573568534,67.82031025079326,18.708976881925704 ]
-    args.pfit = [3,6]
+    args.params=[ 0.08691721421205079,0.007357906253931609,15.283266409525233,0.3166667352406314,0.21001922065075285,66.65477946710972,20.133325341206593 ]
+    args.pfit = [4,]
     logl = LogLike(fitModel,args)
 
     with pm.Model() as model:
         bs = []
         counter = 1
 #        bs += [pm.Uniform('theta'+str(counter), theta_bds[0],args.params[1]*2),]
-        bs += [pm.Uniform('beta1'+str(counter), args.params[3]/1.2,args.params[3]*1.2),]
-#        bs += [pm.Uniform('beta2'+str(counter), beta_bds[0],beta_bds[1]),]
-        bs += [pm.Uniform('start'+str(counter), args.params[6]/2, args.params[6]*2),]
+#        bs += [pm.Uniform('beta1'+str(counter), args.params[3]/1.2,args.params[3]*1.2),]
+        bs += [pm.Uniform('beta2'+str(counter), beta_bds[0],beta_bds[1]),]
+#        bs += [pm.Uniform('start'+str(counter), args.params[6]/2, args.params[6]*2),]
 
         theta = tt.as_tensor_variable(bs)
         likelihood=pm.DensityDist('Likelihood',lambda v: logl(v), observed={'v': theta})
         #                                  logp, observed=dict(theta=theta,
         #                                                                    time=time,
         #                                                                    y=y))
-        trace = pm.sample(5000, cores=12)
+        trace = pm.sample(5000, cores=workers)
+        args.bs = bs
 
     pm.traceplot(trace)
     plt.show()
 
+    
+    figure(2)
+    clf()
+    pt.plotTrace(trace,countries,args)
     sys.exit(0)
 
         
