@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from scipy.stats import binom
 from scipy.integrate import odeint
-#import coronaModel as cm
+import coronaModel as cm
 
 # this class basically strips out the relevant country data from the
 # country code
@@ -17,6 +17,9 @@ class Country:
         temp_days = pd.to_datetime(self.country_data['dateRep'], format='%d/%m/%Y')-pd.to_datetime(origin_date)
         self.country_data['daysSinceOrigin'] = temp_days.copy().dt.days
         self.country_data = self.country_data.sort_values('daysSinceOrigin')
+        # Hack introduced because China just released an extra unreported 1290 deaths
+        if self.country_code == "CHN":
+            self.country_data.loc[self.country_data.daysSinceOrigin==138,"deaths"] = 0
         start_idx = self.country_data[self.country_data['cases'].gt(0)].index[0]
         self.start_day = self.country_data.loc[start_idx]['daysSinceOrigin']
 
@@ -150,10 +153,12 @@ def generateSusceptibleValues(model,country,params):
     susceptible_vals = np.concatenate((np.zeros(start_t),model_output[:,1]))
     return 1.0-susceptible_vals
 
-def runModelForCountry (model,country,params):
+def runModelForCountry (model,country,params,extra_time = 0):
     # We start up to a week before the first obs
     start_t,end_t = country.getFullModelTimespan()
 
+    end_t += extra_time
+    
     tau = int(start_t + params[6])
 
     # new infections/recoveries
@@ -170,13 +175,18 @@ def runModelForCountry (model,country,params):
 
     y1 = 1.0/N
     z1 = 1.0/N
+    x1 = 0.0
 
+    start_vars = [y1,z1]
+    if model == cm.model3:
+        start_vars = [y1,z1,x1]
+        
     # we run the model from tau to end_t (inclusive)
     tspan = np.arange (tau,end_t+1)
-    sol = odeint (model,[y1,z1],tspan,args=(beta1,beta2,tau2,sigma))
+    sol = odeint (model,start_vars,tspan,args=(beta1,beta2,tau2,sigma))
     # and then append some zeros at the start to model 0 infection levels
     #print (tau-start_t)
-    result = np.concatenate ((np.zeros((tau-start_t,2)),sol))
+    result = np.concatenate ((np.zeros((tau-start_t,len(start_vars))),sol))
     return result
 
         
@@ -199,6 +209,7 @@ def fitModelToCountry (model,country,params,args):
     sol = runModelForCountry(model,country,params)
 #    print (sol)
     if (sol.min()<0):
+#        print ("fail",country.country_code)
         return np.inf
     neg_log_likelihood = fitDeathValuesToData (country,theta,psi,sol,args)
 
